@@ -13,9 +13,9 @@ export async function POST(req: NextRequest) {
   // We build the origin from request headers to avoid redirecting to container localhost.
   const safeNext = nextPath.startsWith("/") ? nextPath : "/admin";
 
-  const host = req.headers.get("host");
-  const proto = req.headers.get("x-forwarded-proto") ?? "http";
-  const origin = host ? `${proto}://${host}` : `${proto}://127.0.0.1:3000`;
+  // Use Next's parsed URL origin (based on the incoming Host header).
+  // This prevents redirects to container localhost/IPs.
+  const origin = req.nextUrl.origin;
 
   const failUrl = new URL("/login?error=1", origin);
   const okUrl = new URL(safeNext, origin);
