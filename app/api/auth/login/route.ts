@@ -9,16 +9,15 @@ export async function POST(req: NextRequest) {
   const password = String(form.get("password") ?? "");
   const nextPath = String(form.get("next") ?? "/admin");
 
-  // Next.js requires absolute URLs for redirects in some production paths.
-  // We build the origin from request headers to avoid redirecting to container localhost.
   const safeNext = nextPath.startsWith("/") ? nextPath : "/admin";
 
-  // Use Next's parsed URL origin (based on the incoming Host header).
-  // This prevents redirects to container localhost/IPs.
-  const origin = req.nextUrl.origin;
+  const forwardedHost = req.headers.get("x-forwarded-host");
+  const forwardedProto = req.headers.get("x-forwarded-proto") || "http";
+  const proxyOrigin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : null;
+  const origin = proxyOrigin || req.headers.get("origin") || req.nextUrl.origin;
 
-  const failUrl = new URL("/login?error=1", origin);
-  const okUrl = new URL(safeNext, origin);
+  const failUrl = new URL(origin + "/login?error=1");
+  const okUrl = new URL(origin + safeNext);
 
   if (!verifyAdmin(email, password)) {
     return NextResponse.redirect(failUrl, { status: 303 });
