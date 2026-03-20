@@ -1,0 +1,10 @@
+node_modules
+.next
+.DS_Store
+db/app.db
+uploads/*
+parsed/*
+.env
+.env.local
+error_log.txt
+
