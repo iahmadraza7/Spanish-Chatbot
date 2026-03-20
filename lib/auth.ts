@@ -6,8 +6,8 @@ export const ADMIN_PASSWORD_DEFAULT = "admin1234";
 
 export function getAdminCredentials() {
   return {
-    email: getEnv("ADMIN_EMAIL", ADMIN_EMAIL_DEFAULT)!,
-    password: getEnv("ADMIN_PASSWORD", ADMIN_PASSWORD_DEFAULT)!
+    email: getEnv("ADMIN_EMAIL", ADMIN_EMAIL_DEFAULT)!.trim(),
+    password: getEnv("ADMIN_PASSWORD", ADMIN_PASSWORD_DEFAULT)!.trim()
   };
 }
 
