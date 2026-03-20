@@ -32,8 +32,6 @@ export async function getSqliteDb() {
 
   db = fileBytes ? new (SQL as SqlJsStatic).Database(fileBytes) : new (SQL as SqlJsStatic).Database();
   migrate(db);
-  // Ensure DB file exists on disk for VPS mounts
-  await persist(db);
   return db;
 }
 
@@ -115,7 +113,12 @@ export async function run(d: SqlJsDatabase, sql: string, params: any[] = []) {
 }
 
 export async function persist(d: SqlJsDatabase) {
-  const bytes: Uint8Array = d.export();
-  await fs.writeFile(DB_PATH, Buffer.from(bytes));
+  try {
+    const bytes: Uint8Array = d.export();
+    await fs.writeFile(DB_PATH, Buffer.from(bytes));
+  } catch {
+    // Best-effort persistence for MVP; if something fails in the runtime
+    // environment, we still want the API to keep working.
+  }
 }
 
