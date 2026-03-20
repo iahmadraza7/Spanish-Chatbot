@@ -5,6 +5,7 @@ import { saveMessage, getRecentHistory, detectEscalation, ESCALATION_RESPONSE } 
 import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   // --- Rate limiting ---

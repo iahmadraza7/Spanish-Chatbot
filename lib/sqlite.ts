@@ -1,22 +1,44 @@
-import sqlite3 from "sqlite3";
-import { open, type Database } from "sqlite";
+import fs from "fs/promises";
+import path from "path";
+import type { Database as SqlJsDatabase, SqlJsStatic } from "sql.js";
+import initSqlJsDefault from "sql.js";
 import { DB_PATH, ensureAppDirs } from "@/lib/paths";
 
-let db: Database<sqlite3.Database, sqlite3.Statement> | null = null;
+let db: SqlJsDatabase | null = null;
+let SQL: SqlJsStatic | null = null;
+
+async function init() {
+  if (SQL) return SQL;
+
+  SQL = await initSqlJsDefault({
+    locateFile: (file) =>
+      path.join(process.cwd(), "node_modules", "sql.js", "dist", file)
+  });
+  return SQL;
+}
 
 export async function getSqliteDb() {
   if (db) return db;
   ensureAppDirs();
-  db = await open({
-    filename: DB_PATH,
-    driver: sqlite3.Database
-  });
-  await migrate(db);
+  await init();
+
+  let fileBytes: Uint8Array | null = null;
+  try {
+    const buf = await fs.readFile(DB_PATH);
+    fileBytes = new Uint8Array(buf);
+  } catch {
+    fileBytes = null;
+  }
+
+  db = fileBytes ? new (SQL as SqlJsStatic).Database(fileBytes) : new (SQL as SqlJsStatic).Database();
+  migrate(db);
+  // Ensure DB file exists on disk for VPS mounts
+  await persist(db);
   return db;
 }
 
-async function migrate(d: Database) {
-  await d.exec(`
+function migrate(d: SqlJsDatabase) {
+  d.exec(`
     CREATE TABLE IF NOT EXISTS files (
       id TEXT PRIMARY KEY,
       original_name TEXT NOT NULL,
@@ -61,19 +83,39 @@ async function migrate(d: Database) {
   `);
 }
 
-export async function all<T = any>(d: Database, sql: string, params: any[] = []) {
-  return (await d.all<T[]>(sql, params)) as any;
+export async function all<T = any>(
+  d: SqlJsDatabase,
+  sql: string,
+  params: any[] = []
+) {
+  const stmt = d.prepare(sql);
+  stmt.bind(params);
+  const rows: T[] = [];
+  while (stmt.step()) rows.push(stmt.getAsObject() as T);
+  stmt.free();
+  return rows;
 }
 
-export async function get<T = any>(d: Database, sql: string, params: any[] = []) {
-  return (await d.get<T>(sql, params)) ?? null;
+export async function get<T = any>(
+  d: SqlJsDatabase,
+  sql: string,
+  params: any[] = []
+) {
+  const stmt = d.prepare(sql);
+  stmt.bind(params);
+  const row = stmt.step() ? (stmt.getAsObject() as T) : null;
+  stmt.free();
+  return row;
 }
 
-export async function run(d: Database, sql: string, params: any[] = []) {
-  await d.run(sql, params);
+export async function run(d: SqlJsDatabase, sql: string, params: any[] = []) {
+  const stmt = d.prepare(sql);
+  stmt.run(params);
+  stmt.free();
 }
 
-export async function persist(_d: Database) {
-  // sqlite3 writes to disk automatically; no-op (kept for compatibility).
+export async function persist(d: SqlJsDatabase) {
+  const bytes: Uint8Array = d.export();
+  await fs.writeFile(DB_PATH, Buffer.from(bytes));
 }
 

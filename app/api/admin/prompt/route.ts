@@ -3,6 +3,7 @@ import { getSystemPrompt, saveSystemPrompt } from "@/lib/settings";
 import { get, getSqliteDb } from "@/lib/sqlite";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const prompt = await getSystemPrompt();

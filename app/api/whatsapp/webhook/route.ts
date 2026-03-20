@@ -5,6 +5,7 @@ import { streamAnswerSpanish } from "@/lib/ai/provider";
 import { saveMessage, getRecentHistory, detectEscalation, ESCALATION_RESPONSE } from "@/lib/conversations";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 // Meta verification handshake
 export async function GET(req: NextRequest) {
