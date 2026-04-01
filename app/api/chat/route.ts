@@ -8,6 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
+  console.log("CHAT_API: START");
   // --- Rate limiting ---
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
     || req.headers.get("x-real-ip")
@@ -29,21 +30,28 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  console.log("CHAT_API: RATE LIMIT OK");
+
   // --- Parse body ---
   const body = await req.json().catch(() => ({}));
   const question = String(body?.question ?? "").trim();
   const sessionId = String(body?.sessionId ?? "").trim() || generateSessionId();
   const streaming = body?.stream !== false; // default to streaming
 
+  console.log("CHAT_API: PARSED BODY", { question, sessionId });
+
   if (!question) {
+    console.log("CHAT_API: NO QUESTION");
     return new Response(
       JSON.stringify({ ok: false, error: "Escribe una pregunta." }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
+  console.log("CHAT_API: SAVING USER MESSAGE");
   // --- Save user message ---
   await saveMessage({ sessionId, role: "user", content: question });
+  console.log("CHAT_API: MESSAGE SAVED");
 
   // --- Check for escalation / human handoff ---
   if (detectEscalation(question)) {
