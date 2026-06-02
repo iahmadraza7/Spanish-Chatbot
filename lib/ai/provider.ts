@@ -47,7 +47,7 @@ export async function generateAnswerSpanish(params: {
   if (openaiKey) {
     try {
       const client = new OpenAI({ apiKey: openaiKey });
-      const model = getEnv("OPENAI_MODEL", "gpt-4o-mini")!;
+      const model = getEnv("OPENAI_MODEL", "gpt-5-nano")!;
       const resp = await client.chat.completions.create({
         model,
         messages: [
@@ -116,7 +116,7 @@ export async function* streamAnswerSpanish(params: {
   if (openaiKey) {
     try {
       const client = new OpenAI({ apiKey: openaiKey });
-      const model = getEnv("OPENAI_MODEL", "gpt-4o-mini")!;
+      const model = getEnv("OPENAI_MODEL", "gpt-5-nano")!;
       const stream = await client.chat.completions.create({
         model,
         messages: [
