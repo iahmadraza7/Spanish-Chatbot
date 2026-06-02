@@ -25,6 +25,7 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [escalated, setEscalated] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -103,6 +104,7 @@ export default function ChatPage() {
                 });
                 scrollToBottom();
               } else if (event.type === "done") {
+                if (event.escalated) setEscalated(true);
                 setMessages((m) => {
                   const updated = [...m];
                   updated[updated.length - 1] = {
@@ -130,6 +132,7 @@ export default function ChatPage() {
         // Non-streaming JSON response
         const j = await r.json();
         const a = j.ok ? String(j.answer ?? "") : "No pude responder en este momento.";
+        if (j.escalated) setEscalated(true);
         setMessages((m) => {
           const updated = [...m];
           updated[updated.length - 1] = { role: "assistant", content: a };
@@ -156,6 +159,7 @@ export default function ChatPage() {
 
   function newConversation() {
     localStorage.removeItem("chat_session_id");
+    setEscalated(false);
     setMessages([
       {
         role: "assistant",
@@ -210,6 +214,7 @@ export default function ChatPage() {
                 </div>
               </div>
             )}
+            {escalated && <HandoffForm sessionId={getSessionId()} />}
             <div ref={bottomRef} />
           </div>
 
@@ -243,6 +248,78 @@ export default function ChatPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function HandoffForm({ sessionId }: { sessionId: string }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [err, setErr] = useState("");
+
+  async function submit() {
+    if (sending) return;
+    setSending(true);
+    setErr("");
+    try {
+      const r = await fetch("/api/handoff", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, phone, sessionId })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) {
+        setErr(j.error || "No se pudo enviar. Intente de nuevo.");
+        return;
+      }
+      setSent(true);
+    } catch {
+      setErr("No se pudo enviar. Intente de nuevo.");
+    } finally {
+      setSending(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        ¡Gracias! Un asesor lo contactará pronto. 🙌
+      </div>
+    );
+  }
+
+  const canSend =
+    name.trim().length > 0 && phone.replace(/\D/g, "").length >= 7 && !sending;
+
+  return (
+    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+      <p className="text-sm text-amber-900">
+        Un asesor humano lo contactará pronto. Por favor déjenos su nombre y
+        número de teléfono.
+      </p>
+      <div className="mt-3 flex flex-col sm:flex-row gap-2">
+        <input
+          className="input flex-1"
+          placeholder="Su nombre"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={sending}
+        />
+        <input
+          className="input flex-1"
+          placeholder="Su teléfono"
+          inputMode="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          disabled={sending}
+        />
+        <button className="btn-primary" onClick={() => void submit()} disabled={!canSend}>
+          {sending ? "Enviando…" : "Enviar"}
+        </button>
+      </div>
+      {err && <p className="mt-2 text-xs text-rose-600">{err}</p>}
+    </div>
   );
 }
 

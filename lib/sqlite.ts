@@ -78,6 +78,15 @@ function migrate(d: SqlJsDatabase) {
       value TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS handoffs (
+      id TEXT PRIMARY KEY,
+      session_id TEXT,
+      name TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS handoffs_created_idx ON handoffs(created_at);
   `);
 }
 
