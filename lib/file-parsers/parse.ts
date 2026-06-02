@@ -208,7 +208,12 @@ function postProcessInventoryPdf(raw: string): string | null {
   }
 
   if (out.length === 0) return null;
-  return "INVENTARIO (datos estructurados):\n" + out.join("\n");
+  // Encabezado con términos genéricos para mejorar la recuperación ante
+  // preguntas amplias ("¿qué autos tienen disponibles?", "vehículos", etc.).
+  const header =
+    "INVENTARIO de autos y vehiculos seminuevos disponibles " +
+    "(modelos, precios, kilometraje, colores, años y ubicaciones):";
+  return header + "\n" + out.join("\n");
 }
 
 function normalizeText(s: string) {

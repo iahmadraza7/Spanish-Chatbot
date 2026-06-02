@@ -54,7 +54,9 @@ export async function generateAnswerSpanish(params: {
           { role: "system", content: systemPrompt },
           { role: "user", content: userContent }
         ],
-        temperature: 0.2
+        // Los modelos GPT-5 / o-series solo aceptan la temperatura por
+        // defecto (1); para el resto usamos 0.2 (respuestas más estables).
+        ...(supportsCustomTemperature(model) ? { temperature: 0.2 } : {})
       });
       const answer = resp.choices?.[0]?.message?.content?.trim() || "";
       return {
@@ -123,7 +125,9 @@ export async function* streamAnswerSpanish(params: {
           { role: "system", content: systemPrompt },
           { role: "user", content: userContent }
         ],
-        temperature: 0.2,
+        // Ver nota en generateAnswerSpanish: GPT-5 / o-series solo aceptan
+        // la temperatura por defecto.
+        ...(supportsCustomTemperature(model) ? { temperature: 0.2 } : {}),
         stream: true
       });
 
@@ -144,6 +148,14 @@ export async function* streamAnswerSpanish(params: {
   // Fallback (no streaming — single chunk)
   const answer = fallbackAnswer(params.question, params.context);
   yield { chunk: answer, provider: "fallback", done: true };
+}
+
+/**
+ * Los modelos GPT-5 y o-series (razonamiento) solo aceptan temperature = 1
+ * (el valor por defecto). Para esos modelos omitimos el parámetro.
+ */
+function supportsCustomTemperature(model: string): boolean {
+  return !/^(gpt-5|o\d)/i.test(model);
 }
 
 function formatHistory(history?: HistoryMessage[]): string {
