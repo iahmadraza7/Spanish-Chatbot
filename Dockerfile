@@ -8,6 +8,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Las variables NEXT_PUBLIC_* se incrustan al compilar. Para cambiar el
+# nombre de la marca en el bundle del cliente, pase --build-arg al construir.
+ARG NEXT_PUBLIC_APP_NAME="Grupo Banzai Veracruz"
+ENV NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
 RUN mkdir -p public
 RUN npm run build
 

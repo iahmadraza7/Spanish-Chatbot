@@ -6,6 +6,7 @@ import { UPLOADS_DIR, ensureAppDirs } from "@/lib/paths";
 import { parseFileBuffer } from "@/lib/file-parsers/parse";
 import { indexParsedText } from "@/lib/rag/index";
 import { getSqliteDb, persist, run } from "@/lib/sqlite";
+import { checkUploadRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -23,6 +24,27 @@ const ALLOWED_EXT = new Set([
 
 export async function POST(req: Request) {
   ensureAppDirs();
+
+  // --- Rate limiting: 10 subidas por minuto por IP ---
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+  const rl = checkUploadRateLimit(ip);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Demasiadas subidas. Espere un momento antes de cargar otro archivo."
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rl.resetMs / 1000)) }
+      }
+    );
+  }
+
   const form = await req.formData();
   const file = form.get("file");
   if (!file || !(file instanceof File)) {

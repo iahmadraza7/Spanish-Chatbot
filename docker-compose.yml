@@ -1,9 +1,11 @@
 services:
   app:
     build: .
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
+      - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-Grupo Banzai Veracruz}
       - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@demo.com}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin1234}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}

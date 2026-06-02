@@ -5,6 +5,8 @@ import Link from "next/link";
 
 type Msg = { role: "user" | "assistant"; content: string; streaming?: boolean };
 
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || "Grupo Banzai Veracruz";
+
 function getSessionId(): string {
   if (typeof window === "undefined") return "";
   let id = localStorage.getItem("chat_session_id");
@@ -178,9 +180,9 @@ export default function ChatPage() {
               AI
             </div>
             <div>
-              <h1 className="text-base font-semibold text-slate-900">Asistente</h1>
+              <h1 className="text-base font-semibold text-slate-900">{APP_NAME}</h1>
               <p className="text-xs text-slate-500">
-                Respuestas basadas en archivos del negocio
+                Asistente de ventas — inventario de autos seminuevos
               </p>
             </div>
           </div>
