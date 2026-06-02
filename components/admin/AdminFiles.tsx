@@ -151,7 +151,7 @@ export function AdminFiles({ variant = "default" }: { variant?: "default" | "das
             </h2>
             <p className="text-xs text-slate-500 mt-1">
               Arrastra y suelta o elige un archivo. Formatos: PDF, TXT, DOCX,
-              CSV, XLSX.
+              CSV, XLSX, PNG, JPG.
             </p>
           </div>
         </div>
@@ -397,7 +397,7 @@ function UploadBox({
           <input
             type="file"
             className="hidden"
-            accept=".pdf,.csv,.xlsx,.xls,.txt,.docx"
+            accept=".pdf,.csv,.xlsx,.xls,.txt,.docx,.png,.jpg,.jpeg"
             disabled={disabled}
             onChange={(e) => {
               const f = e.target.files?.[0];

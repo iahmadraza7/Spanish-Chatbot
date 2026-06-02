@@ -3,6 +3,7 @@ import { ParsedDoc } from "@/lib/file-parsers/types";
 import pdf from "pdf-parse";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
+import Tesseract from "tesseract.js";
 
 export async function parseFileBuffer(
   originalName: string,
@@ -14,6 +15,24 @@ export async function parseFileBuffer(
   if (ext === ".pdf" || mimeType === "application/pdf") {
     const data = await pdf(buffer);
     return { text: normalizeText(data.text) };
+  }
+
+  if (
+    ext === ".png" ||
+    ext === ".jpg" ||
+    ext === ".jpeg" ||
+    mimeType === "image/png" ||
+    mimeType === "image/jpeg"
+  ) {
+    try {
+      // Primera ejecución descarga los modelos spa+eng (~25 MB).
+      const { data } = await Tesseract.recognize(buffer, "spa+eng");
+      return { text: normalizeText(data.text || "") };
+    } catch (err) {
+      throw new Error(
+        "No se pudo extraer el texto de la imagen. Verifique que la imagen sea legible e intente nuevamente."
+      );
+    }
   }
 
   if (ext === ".txt") {

@@ -9,7 +9,17 @@ import { getSqliteDb, persist, run } from "@/lib/sqlite";
 
 export const runtime = "nodejs";
 
-const ALLOWED_EXT = new Set([".pdf", ".csv", ".xlsx", ".xls", ".txt", ".docx"]);
+const ALLOWED_EXT = new Set([
+  ".pdf",
+  ".csv",
+  ".xlsx",
+  ".xls",
+  ".txt",
+  ".docx",
+  ".png",
+  ".jpg",
+  ".jpeg"
+]);
 
 export async function POST(req: Request) {
   ensureAppDirs();
@@ -29,7 +39,7 @@ export async function POST(req: Request) {
       {
         ok: false,
         error:
-          "Formato no soportado. Use PDF, CSV, XLSX, TXT o DOCX."
+          "Formato no soportado. Use PDF, CSV, XLSX, TXT, DOCX, PNG o JPG."
       },
       { status: 400 }
     );
