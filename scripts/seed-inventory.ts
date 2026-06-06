@@ -67,6 +67,7 @@ async function main() {
   const ext = path.extname(fileName).toLowerCase() || ".pdf";
   const id = newId("file");
   const storedName = `${id}${ext}`;
+  const storedPath = path.join(UPLOADS_DIR, storedName);
   // Etiqueta amigable para el panel de administración, conservando el
   // nombre original del archivo de origen.
   const originalName = `Inventario Banzai - ${fileName}`;
@@ -86,6 +87,8 @@ async function main() {
     ]
   );
   await persist(db);
+
+  fs.copyFileSync(filePath, storedPath);
 
   const parsed = await parseFileBuffer(fileName, "application/pdf", buffer);
   const indexed = await indexParsedText(id, originalName, parsed.text);

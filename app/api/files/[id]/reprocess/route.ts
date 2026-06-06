@@ -46,7 +46,7 @@ export async function POST(
   await persist(db);
 
   try {
-    const buf = await fs.readFile(path.join(UPLOADS_DIR, file.stored_name));
+    const buf = await readStoredFileWithSeedFallback(file);
     const parsed = await parseFileBuffer(file.original_name, file.mime_type, buf);
     const indexed = await indexParsedText(file.id, file.original_name, parsed.text);
     return NextResponse.json({ ok: true, chunkCount: indexed.chunkCount });
@@ -61,5 +61,28 @@ export async function POST(
       { status: 500 }
     );
   }
+}
+
+async function readStoredFileWithSeedFallback(file: {
+  original_name: string;
+  stored_name: string;
+}) {
+  const storedPath = path.join(UPLOADS_DIR, file.stored_name);
+  try {
+    return await fs.readFile(storedPath);
+  } catch (e: any) {
+    if (e?.code !== "ENOENT") throw e;
+  }
+
+  const seedName = file.original_name.replace(/^Inventario Banzai -\s*/i, "");
+  const fallbackName = path.basename(seedName);
+  if (!fallbackName || fallbackName === file.stored_name) {
+    throw new Error(`No se encontró el archivo original: ${file.stored_name}`);
+  }
+
+  const fallbackPath = path.join(UPLOADS_DIR, fallbackName);
+  const buffer = await fs.readFile(fallbackPath);
+  await fs.copyFile(fallbackPath, storedPath).catch(() => undefined);
+  return buffer;
 }
 

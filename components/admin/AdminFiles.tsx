@@ -382,13 +382,19 @@ function UploadBox({
               <span className="rounded-full border border-slate-200 bg-white px-2 py-1">
                 XLSX
               </span>
+              <span className="rounded-full border border-slate-200 bg-white px-2 py-1">
+                PNG
+              </span>
+              <span className="rounded-full border border-slate-200 bg-white px-2 py-1">
+                JPG
+              </span>
             </div>
           </div>
         ) : (
           <div>
             <div className="text-sm font-medium">Subir archivo</div>
             <div className="text-xs text-slate-500">
-              Formatos: PDF, CSV, XLSX, DOCX, TXT.
+              Formatos: PDF, CSV, XLSX, DOCX, TXT, PNG, JPG.
             </div>
           </div>
         )}
