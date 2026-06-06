@@ -12,12 +12,11 @@
     "manual": "tsx scripts/build-manual.ts"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.11.0",
     "@radix-ui/react-scroll-area": "^1.0.5",
     "autoprefixer": "^10.4.19",
     "clsx": "^2.1.0",
     "mammoth": "^1.6.0",
-    "next": "14.2.5",
+    "next": "14.2.35",
     "openai": "^4.52.0",
     "pdf-parse": "^1.1.1",
     "postcss": "^8.4.38",
@@ -34,7 +33,7 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.5",
+    "eslint-config-next": "14.2.35",
     "marked": "^18.0.4",
     "postcss": "^8.4.38",
     "puppeteer": "^25.1.0",

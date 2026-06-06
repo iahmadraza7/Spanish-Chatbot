@@ -27,7 +27,7 @@ export default function LoginPage({
               className="input"
               name="email"
               type="email"
-              placeholder="admin@demo.com"
+              placeholder="tu@correo.com"
               required
             />
           </div>
@@ -37,7 +37,7 @@ export default function LoginPage({
               className="input"
               name="password"
               type="password"
-              placeholder="admin1234"
+              placeholder="••••••••"
               required
             />
           </div>
@@ -48,10 +48,6 @@ export default function LoginPage({
         </form>
 
         <div className="text-xs text-slate-500 space-y-2">
-          <p>
-            Demo rápida: usa <b>admin@demo.com</b> / <b>admin1234</b> (o define
-            variables <code>ADMIN_EMAIL</code> y <code>ADMIN_PASSWORD</code>).
-          </p>
           <p>
             <Link className="underline" href="/chat">
               Ir al chatbot sin iniciar sesión

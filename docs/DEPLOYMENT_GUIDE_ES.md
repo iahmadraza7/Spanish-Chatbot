@@ -20,8 +20,7 @@ dominio y SSL, la integración opcional con WhatsApp, y la operación diaria.
   ```
 - **Un dominio o subdominio** apuntando a la IP pública del VPS, por
   ejemplo `bot.grupobanzai.com` (registro DNS tipo A → IP del VPS).
-- Una **clave de OpenAI** (`OPENAI_API_KEY`) y/o **clave de Gemini**
-  (`GEMINI_API_KEY`).
+- Una **clave de OpenAI** (`OPENAI_API_KEY`).
 - El archivo del inventario en PDF (lista de precios vigente).
 
 ---
@@ -72,11 +71,7 @@ ADMIN_PASSWORD=una_contraseña_larga_y_segura
 
 # Proveedor de IA
 OPENAI_API_KEY=sk-...
-OPENAI_MODEL=gpt-5-nano
-
-# Opcional: Gemini (si está presente, se usa primero)
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-flash-latest
+OPENAI_MODEL=gpt-5-mini
 
 # WhatsApp (opcional, ver sección 8)
 WHATSAPP_VERIFY_TOKEN=

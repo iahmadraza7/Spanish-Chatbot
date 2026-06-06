@@ -1,11 +1,10 @@
 import OpenAI from "openai";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getEnv } from "@/lib/env";
 import { getSystemPrompt } from "@/lib/settings";
 
 export type AIResult = {
   answer: string;
-  provider: "openai" | "gemini" | "fallback";
+  provider: "openai" | "fallback";
 };
 
 type HistoryMessage = { role: "user" | "assistant"; content: string };
@@ -16,7 +15,6 @@ export async function generateAnswerSpanish(params: {
   history?: HistoryMessage[];
 }): Promise<AIResult> {
   const openaiKey = getEnv("OPENAI_API_KEY");
-  const geminiKey = getEnv("GEMINI_API_KEY");
   const systemPrompt = await getSystemPrompt();
 
   const historyBlock = formatHistory(params.history);
@@ -25,24 +23,6 @@ export async function generateAnswerSpanish(params: {
     (historyBlock ? `HISTORIAL DE CONVERSACIÓN:\n${historyBlock}\n\n` : "") +
     `PREGUNTA DEL USUARIO:\n${params.question}\n\n` +
     `INSTRUCCIONES:\n- Responde en español.\n- Si falta información, di: "No encontré esa información en los archivos actuales."`;
-
-  if (geminiKey) {
-    try {
-      const genAI = new GoogleGenerativeAI(geminiKey);
-      const modelName = getEnv("GEMINI_MODEL", "gemini-flash-latest")!;
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const prompt = systemPrompt + "\n\n" + userContent;
-      const resp = await model.generateContent(prompt);
-      const answer = resp.response.text().trim();
-      return {
-        answer: answer || fallbackAnswer(params.question, params.context),
-        provider: "gemini"
-      };
-    } catch (e) {
-      console.error("Gemini Error:", e);
-      // Fall through to OpenAI
-    }
-  }
 
   if (openaiKey) {
     try {
@@ -79,9 +59,8 @@ export async function* streamAnswerSpanish(params: {
   question: string;
   context: string;
   history?: HistoryMessage[];
-}): AsyncGenerator<{ chunk: string; provider: "openai" | "gemini" | "fallback"; done: boolean }> {
+}): AsyncGenerator<{ chunk: string; provider: "openai" | "fallback"; done: boolean }> {
   const openaiKey = getEnv("OPENAI_API_KEY");
-  const geminiKey = getEnv("GEMINI_API_KEY");
   const systemPrompt = await getSystemPrompt();
 
   const historyBlock = formatHistory(params.history);
@@ -90,29 +69,6 @@ export async function* streamAnswerSpanish(params: {
     (historyBlock ? `HISTORIAL DE CONVERSACIÓN:\n${historyBlock}\n\n` : "") +
     `PREGUNTA DEL USUARIO:\n${params.question}\n\n` +
     `INSTRUCCIONES:\n- Responde en español.\n- Si falta información, di: "No encontré esa información en los archivos actuales."`;
-
-  // Try Gemini streaming
-  if (geminiKey) {
-    try {
-      const genAI = new GoogleGenerativeAI(geminiKey);
-      const modelName = getEnv("GEMINI_MODEL", "gemini-flash-latest")!;
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const prompt = systemPrompt + "\n\n" + userContent;
-      const result = await model.generateContentStream(prompt);
-
-      for await (const part of result.stream) {
-        const chunk = part.text();
-        if (chunk) {
-          yield { chunk, provider: "gemini", done: false };
-        }
-      }
-      yield { chunk: "", provider: "gemini", done: true };
-      return;
-    } catch (e) {
-      console.error("Gemini Streaming Error:", e);
-      // Fall through to OpenAI
-    }
-  }
 
   // Try OpenAI streaming
   if (openaiKey) {

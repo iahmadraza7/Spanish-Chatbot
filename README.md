@@ -9,7 +9,7 @@ This repository is a **demo/MVP** for a Spanish-language chatbot with an admin p
 - Upload + parse files (PDF/CSV/XLSX/TXT/DOCX)
 - SQLite storage (`db/app.db`)
 - Lightweight RAG: chunking + keyword retrieval
-- Optional AI provider layer (OpenAI or Gemini). If no keys, uses fallback mode.
+- AI provider layer (OpenAI). If no key is set, uses fallback mode.
 
 ## Requirements
 
@@ -30,14 +30,13 @@ Open:
 - Admin: `http://localhost:3000/admin`
 - Chat: `http://localhost:3000/chat`
 
-## Demo admin login
+## Admin login
 
-- Email: **admin@demo.com**
-- Password: **admin1234**
-
-You can override via env vars:
+Admin credentials are **required** via env vars (no defaults in production):
 - `ADMIN_EMAIL`
 - `ADMIN_PASSWORD`
+
+Set them in `.env` before starting the app.
 
 ## How to upload files
 

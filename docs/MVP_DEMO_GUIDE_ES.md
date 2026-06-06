@@ -14,9 +14,7 @@ Demostrar en pocos minutos que el sistema:
 ### 1) Iniciar sesión
 
 - Ir a `http://localhost:3000/login`
-- Credenciales demo:
-  - Correo: **admin@demo.com**
-  - Contraseña: **admin1234**
+- Usar las credenciales definidas en `.env` (`ADMIN_EMAIL` / `ADMIN_PASSWORD`).
 
 ### 2) Subir el PDF (o Excel/CSV/Word/TXT)
 

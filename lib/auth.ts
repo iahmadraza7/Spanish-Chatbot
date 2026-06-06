@@ -1,19 +1,19 @@
 import crypto from "crypto";
 import { getEnv } from "@/lib/env";
 
-export const ADMIN_EMAIL_DEFAULT = "admin@demo.com";
-export const ADMIN_PASSWORD_DEFAULT = "admin1234";
-
 export function getAdminCredentials() {
   return {
-    email: getEnv("ADMIN_EMAIL", ADMIN_EMAIL_DEFAULT)!.trim().replace(/^['"]|['"]$/g, ''),
-    password: getEnv("ADMIN_PASSWORD", ADMIN_PASSWORD_DEFAULT)!.trim().replace(/^['"]|['"]$/g, '')
+    email: (getEnv("ADMIN_EMAIL") ?? "").trim().replace(/^['"]|['"]$/g, ''),
+    password: (getEnv("ADMIN_PASSWORD") ?? "").trim().replace(/^['"]|['"]$/g, '')
   };
 }
 
 export function verifyAdmin(email: string, password: string) {
   const creds = getAdminCredentials();
-  const emailOk = timingSafeEqual(email.trim().toLowerCase(), creds.email);
+  // Fail closed: si no hay credenciales configuradas en el entorno, se
+  // rechaza el acceso (no hay usuario/contraseña por defecto en producción).
+  if (!creds.email || !creds.password) return false;
+  const emailOk = timingSafeEqual(email.trim().toLowerCase(), creds.email.toLowerCase());
   const passOk = timingSafeEqual(password, creds.password);
   return emailOk && passOk;
 }
