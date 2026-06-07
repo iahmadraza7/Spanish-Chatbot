@@ -14,7 +14,9 @@ services:
       - WHATSAPP_PHONE_NUMBER_ID=${WHATSAPP_PHONE_NUMBER_ID:-}
       - WHATSAPP_ACCESS_TOKEN=${WHATSAPP_ACCESS_TOKEN:-}
     volumes:
-      - ./uploads:/app/uploads
-      - ./parsed:/app/parsed
-      - ./db:/app/db
+      # ":z" lets the container write to these folders when SELinux is enforcing
+      # (AlmaLinux/RHEL). Harmless when SELinux is off.
+      - ./uploads:/app/uploads:z
+      - ./parsed:/app/parsed:z
+      - ./db:/app/db:z
 
